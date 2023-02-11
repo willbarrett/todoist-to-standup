@@ -2,9 +2,18 @@ require 'bundler/setup'
 require 'dotenv/load'
 require 'business_time'
 require 'httparty'
+require 'slack-ruby-client'
 
 TODOIST_REST_API_BASE = "https://api.todoist.com/rest/v2"
 TODOIST_SYNC_API_BASE = "https://api.todoist.com/sync/v9"
+
+Slack.configure do |config|
+  config.token = ENV['SLACK_API_TOKEN']
+end
+
+slack_client = Slack::Web::Client.new
+
+#slack_client.auth_test
 
 token = ENV['TODOIST_API_KEY']
 auth_header = {
@@ -69,3 +78,20 @@ if blockers.any?
 end
 
 puts standup_update
+
+IO.popen('pbcopy', 'w') { |f| f << standup_update }
+
+puts "\n\nStandup update has been copied to clipboard"
+
+# puts "\n"
+# puts "OK to post? (y/n)"
+# send_approval = gets.chomp.strip == "y"
+
+# if send_approval
+#   slack_client.chat_postMessage(
+#     channel: "#test-bot-channel",
+#     text: "Hello from Ruby!",
+#     as_user: true
+#   )
+# end
+
